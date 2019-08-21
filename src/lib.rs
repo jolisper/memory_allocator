@@ -1,19 +1,23 @@
-//! A learning purpose memory allocator that follows 
+//! A learning purpose memory allocator that follows
 //! "[writing a memory allocator](http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator/)" exercise.
 
-#![deny(missing_docs,
-        missing_debug_implementations, 
-        trivial_casts, 
-        trivial_numeric_casts,
-        unstable_features,
-        unused_import_braces, 
-        unused_qualifications)]
+#![deny(
+    missing_docs,
+    missing_debug_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unstable_features,
+    unused_import_braces,
+    unused_qualifications
+)]
 
+mod block_reuse;
 #[cfg(test)]
 mod tests;
 
 extern crate libc;
 
+use crate::block_reuse::{first_fit::FirstFit, Algorithm};
 use std::{mem, ptr};
 
 /// Allocated block of memory. Contains the object structure,
@@ -21,7 +25,7 @@ use std::{mem, ptr};
 #[repr(C)]
 #[derive(Debug)]
 pub struct Block {
-// -------- Object Header -----------
+    // -------- Object Header -----------
     /// Block size
     pub size: libc::size_t,
 
@@ -31,15 +35,15 @@ pub struct Block {
     /// Next block in the list
     pub next: *mut Block,
 
-// --------- User Data --------------
+    // --------- User Data --------------
     /// Payload pointer
     pub data: DataPointer,
 }
 
 /// Heap start. Initialized on first allocation.
-static mut HEAP_START: *mut Block = ptr::null_mut();
+pub(crate) static mut HEAP_START: *mut Block = ptr::null_mut();
 /// Current top. Updated on each allocation.
-static mut HEAP_TOP: *mut Block = unsafe { HEAP_START };
+pub(crate) static mut HEAP_TOP: *mut Block = unsafe { HEAP_START };
 
 /// Machine word size. Depending on the architecture,
 /// can be 4 or 8 bytes.
@@ -66,7 +70,7 @@ pub fn alloc(size: usize) -> *mut WordSize {
 
         // Init heap
         if HEAP_START.is_null() {
-            HEAP_START = block;    
+            HEAP_START = block;
         }
 
         // Chain the blocks
@@ -88,8 +92,9 @@ pub fn free(data: *mut WordSize) {
 }
 
 /// Tries to find a block of a needed size.
-fn find_block(_size: usize) -> Option<*mut Block> {
-    None
+fn find_block(size: usize) -> Option<*mut Block> {
+    let allocator = FirstFit::default();
+    unsafe { allocator.find_block(size) }
 }
 
 /// Get a pointer to data of a block.
@@ -106,7 +111,7 @@ fn align(n: libc::size_t) -> libc::size_t {
 
 /// Returns total allocation size, reserving in addition the space for
 /// the Block structure (object header + first data word).
-/// 
+///
 /// Since the `data: DataPointer` already allocates one word inside the Block
 /// structure, we decrease it from the size request: if a user allocates
 /// only one word, it's fully in the Block struct.
@@ -121,7 +126,7 @@ fn request_from_os(size: usize) -> Option<*mut Block> {
 
     if unsafe { libc::sbrk(alloc_size(size)) } == -1_isize as *mut libc::c_void {
         return None;
-    } 
+    }
 
     Some(block)
 }

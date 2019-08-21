@@ -38,4 +38,14 @@ fn test_alloc() {
     //
     free(p2);
     assert!(unsafe { !(*p2b).used });
+
+    // --------------------------------------
+    // Test case 4: The block is reused
+    //
+    // A consequent allocation of the same size reuses
+    // the previously freed block.
+    let p3 = alloc(8);
+    let p3b = get_header(p3);
+    assert!(unsafe { (*p3b).size == 8 });
+    assert!(p3b == p2b);
 }
