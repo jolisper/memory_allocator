@@ -1,5 +1,5 @@
-use std::alloc::{GlobalAlloc, Layout};
 use crate::{alloc, free, WordSize};
+use std::alloc::{GlobalAlloc, Layout};
 
 /// Rust memory allocator using the mem alloc
 #[derive(Debug)]

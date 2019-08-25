@@ -1,4 +1,4 @@
-use crate::block::{Block, DataPointer, WordSize, ReuseAlgorithmBuilder, ReuseAlgorithm};
+use crate::block::{Block, DataPointer, ReuseAlgorithm, ReuseAlgorithmBuilder, WordSize};
 use crate::heap::{HEAP_START, HEAP_TOP};
 use std::mem;
 

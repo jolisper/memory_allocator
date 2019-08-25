@@ -15,6 +15,6 @@ impl ReuseAlgorithmBuilder {
     pub fn build(variant: ReuseAlgorithmBuilder) -> impl ReuseAlgorithm {
         match variant {
             ReuseAlgorithmBuilder::FirstFit => first_fit::FirstFit::default(),
-        }   
+        }
     }
 }
