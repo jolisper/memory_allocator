@@ -14,7 +14,10 @@
 mod alloc;
 mod block;
 mod heap;
+mod rust_allocator;
 
 extern crate libc;
 
 pub use alloc::{alloc, free};
+pub use block::WordSize;
+pub use rust_allocator::RustAllocator;
