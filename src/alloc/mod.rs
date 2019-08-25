@@ -1,6 +1,6 @@
 use crate::block::{Block, DataPointer, ReuseAlgorithm, ReuseAlgorithmBuilder, WordSize};
 use crate::heap::{HEAP_START, HEAP_TOP};
-use std::mem;
+use std::{mem, ptr};
 
 #[cfg(test)]
 mod tests;
@@ -23,6 +23,7 @@ pub fn alloc(size: usize) -> *mut WordSize {
     unsafe {
         (*block).size = size;
         (*block).used = true;
+        (*block).next = ptr::null_mut();
 
         // Init heap
         if HEAP_START.is_null() {
