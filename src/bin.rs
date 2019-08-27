@@ -4,13 +4,23 @@ use libmemory_allocator::RustAllocator;
 static GLOBAL: RustAllocator = RustAllocator;
 
 pub fn main() {
-    let mut vs = Vec::new();
-    vs.push(1);
-    vs.push(2);
-    vs.push(3);
-    vs.push(4);
+    // Alloc simple i32
+    let _n = Box::new(3);
 
-    let sum: i32 = vs.iter().sum();
+    {
+        Box::new([1,2,3]);
+    };
 
-    println!("{}", sum);
+    //Usign String to force mem alloc
+    let mut vs = Vec::<String>::new();
+    vs.push(String::from("Hello"));
+    vs.push(String::from("world,"));
+    vs.push(String::from("global"));
+    vs.push(String::from("allocator"));
+
+    println!("{}", concatenate(vs));
+}
+
+fn concatenate(vs: Vec<String>) -> String {
+    vs.join(" ")
 }

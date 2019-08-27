@@ -11,8 +11,8 @@ impl ReuseAlgorithm for FirstFit {
         while !block.is_null() {
             unsafe {
                 // O(n) search
-                if (*block).used || (*block).size < size {
-                    block = (*block).next;
+                if (*block).header.used || (*block).header.size < size {
+                    block = (*block).header.next;
                     continue;
                 }
             }

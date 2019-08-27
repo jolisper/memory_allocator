@@ -1,4 +1,4 @@
-use crate::block::{Block, DataPointer, ReuseAlgorithm, ReuseAlgorithmBuilder, WordSize};
+use crate::block::{Block, ObjectHeader, DataPointer, ReuseAlgorithm, ReuseAlgorithmBuilder, WordSize};
 use crate::heap::{HEAP_START, HEAP_TOP};
 use std::{mem, ptr};
 
@@ -21,9 +21,12 @@ pub fn alloc(size: usize) -> *mut WordSize {
     };
 
     unsafe {
-        (*block).size = size;
-        (*block).used = true;
-        (*block).next = ptr::null_mut();
+        let header = ObjectHeader {
+            size,
+            used: true,
+            next: ptr::null_mut(),
+        };
+        (*block).header = header;
 
         // Init heap
         if HEAP_START.is_null() {
@@ -32,12 +35,12 @@ pub fn alloc(size: usize) -> *mut WordSize {
 
         // Chain the blocks
         if !HEAP_TOP.is_null() {
-            (*HEAP_TOP).next = block;
+            (*HEAP_TOP).header.next = block;
         }
 
         HEAP_TOP = block;
     }
-
+    //println!("{:?}", unsafe { (*block).clone() });
     // User payload
     from(block)
 }
@@ -45,7 +48,7 @@ pub fn alloc(size: usize) -> *mut WordSize {
 /// Frees a previously allocated block.
 pub fn free(data: *mut WordSize) {
     let block = get_header(data);
-    unsafe { (*block).used = false };
+    unsafe { (*block).header.used = false };
 }
 
 /// Tries to find a block of a needed size.
@@ -62,8 +65,8 @@ fn from(block: *mut Block) -> *mut WordSize {
 
 /// Aligns the size by the machine word.
 #[inline]
-fn align(n: libc::size_t) -> libc::size_t {
-    (n + mem::size_of::<WordSize>() - 1) & !(mem::size_of::<WordSize>() - 1)
+fn align(size: libc::size_t) -> libc::size_t {
+    (size + mem::size_of::<isize>() - 1) & !(mem::size_of::<isize>() - 1)
 }
 
 /// Returns total allocation size, reserving in addition the space for
@@ -90,5 +93,5 @@ fn request_from_os(size: usize) -> Option<*mut Block> {
 
 /// Returns the object header.
 pub fn get_header(data: *mut WordSize) -> *mut Block {
-    (data as usize + mem::size_of::<DataPointer>() - mem::size_of::<Block>()) as *mut Block
+    (data as usize - mem::size_of::<ObjectHeader>()) as *mut Block
 }
