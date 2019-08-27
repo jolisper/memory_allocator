@@ -26,23 +26,22 @@ fn test_alloc() {
     let p1 = alloc(3);
     let p1b = get_header(p1);
     assert!(unsafe { (*p1b).header.size == 8 });
-    
+
     // --------------------------------------
-    // Test case 2: Exact amount of aligned bytes
+    // Test case 2: Exact amount of aligned bytes.
     //
     let p2 = alloc(8);
     let p2b = get_header(p2);
-    //println!("{}", unsafe { (*p2b).size });
     assert!(unsafe { (*p2b).header.size == 8 });
 
     // --------------------------------------
-    // Test case 3: Free the object
+    // Test case 3: Free the object.
     //
     free(p2);
     assert!(unsafe { !(*p2b).header.used });
 
     // --------------------------------------
-    // Test case 4: The block is reused
+    // Test case 4: The block is reused.
     //
     // A consequent allocation of the same size reuses
     // the previously freed block.

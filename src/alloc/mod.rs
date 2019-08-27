@@ -1,4 +1,6 @@
-use crate::block::{Block, ObjectHeader, DataPointer, ReuseAlgorithm, ReuseAlgorithmBuilder, WordSize};
+use crate::block::{
+    Block, ObjectHeader, DataPointer, ReuseAlgorithm, ReuseAlgorithmBuilder, UserData, WordSize,
+};
 use crate::heap::{HEAP_START, HEAP_TOP};
 use std::{mem, ptr};
 
@@ -8,7 +10,7 @@ mod tests;
 type Algorithm = ReuseAlgorithmBuilder;
 
 /// Allocates a block of memory of (at least) `size` bytes.
-pub fn alloc(size: usize) -> *mut WordSize {
+pub fn alloc(size: usize) -> DataPointer {
     let size = align(size);
 
     if let Some(block) = find_block(size) {
@@ -40,13 +42,12 @@ pub fn alloc(size: usize) -> *mut WordSize {
 
         HEAP_TOP = block;
     }
-    //println!("{:?}", unsafe { (*block).clone() });
     // User payload
     from(block)
 }
 
 /// Frees a previously allocated block.
-pub fn free(data: *mut WordSize) {
+pub fn free(data: DataPointer) {
     let block = get_header(data);
     unsafe { (*block).header.used = false };
 }
@@ -58,31 +59,30 @@ fn find_block(size: usize) -> Option<*mut Block> {
 }
 
 /// Get a pointer to data of a block.
-fn from(block: *mut Block) -> *mut WordSize {
-    let p: *mut WordSize = unsafe { &mut (*block).data[0] };
-    p
+fn from(block: *mut Block) -> DataPointer {
+    unsafe { &mut (*block).data[0] }
 }
 
 /// Aligns the size by the machine word.
 #[inline]
-fn align(size: libc::size_t) -> libc::size_t {
-    (size + mem::size_of::<isize>() - 1) & !(mem::size_of::<isize>() - 1)
+fn align(size: usize) -> usize {
+    (size + mem::size_of::<WordSize>() - 1) & !(mem::size_of::<WordSize>() - 1)
 }
 
 /// Returns total allocation size, reserving in addition the space for
 /// the Block structure (object header + first data word).
 ///
-/// Since the `data: DataPointer` already allocates one word inside the Block
+/// Since the UserData already allocates one byte inside the Block
 /// structure, we decrease it from the size request: if a user allocates
-/// only one word, it's fully in the Block struct.
+/// only one byte, it's fully in the Block struct.
 #[inline]
-fn alloc_size(size: libc::size_t) -> libc::intptr_t {
-    (size + mem::size_of::<Block>() - mem::size_of::<DataPointer>()) as libc::intptr_t
+fn alloc_size(size: usize) -> libc::intptr_t {
+    (size + mem::size_of::<Block>() - mem::size_of::<UserData>()) as libc::intptr_t
 }
 
 /// Requests (maps) memory from OS.
 fn request_from_os(size: usize) -> Option<*mut Block> {
-    let block = unsafe { libc::sbrk(0) as (*mut Block) };
+    let block = unsafe { libc::sbrk(0) as *mut Block };
 
     if unsafe { libc::sbrk(alloc_size(size)) } == -1_isize as *mut libc::c_void {
         return None;
@@ -92,6 +92,6 @@ fn request_from_os(size: usize) -> Option<*mut Block> {
 }
 
 /// Returns the object header.
-pub fn get_header(data: *mut WordSize) -> *mut Block {
+pub fn get_header(data: DataPointer) -> *mut Block {
     (data as usize - mem::size_of::<ObjectHeader>()) as *mut Block
 }

@@ -2,7 +2,7 @@ mod first_fit;
 
 use crate::block::Block;
 
-/// Allocator algorithms interface
+/// Allocator algorithms interface.
 pub trait ReuseAlgorithm {
     fn find_block(&self, size: usize) -> Option<*mut Block>;
 }

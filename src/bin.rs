@@ -8,10 +8,10 @@ pub fn main() {
     let _n = Box::new(3);
 
     {
-        Box::new([1,2,3]);
+        Box::new([1, 2, 3]);
     };
 
-    //Usign String to force mem alloc
+    // Usign String to force mem alloc
     let mut vs = Vec::<String>::new();
     vs.push(String::from("Hello"));
     vs.push(String::from("world,"));

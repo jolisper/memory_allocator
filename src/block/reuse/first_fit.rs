@@ -1,7 +1,7 @@
 use crate::block::{reuse::ReuseAlgorithm, Block};
 use crate::heap::HEAP_START;
 
-/// First-fit algorithm allocator
+/// First-fit algorithm allocator.
 #[derive(Default)]
 pub struct FirstFit;
 
