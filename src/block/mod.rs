@@ -1,6 +1,6 @@
-pub(crate) mod reuse;
+mod reuse;
 
-pub(crate) use reuse::{ReuseAlgorithm, ReuseAlgorithmBuilder};
+pub use reuse::{BlockReuseFn, FIRST_FIT};
 
 /// Machine word size. Depending on the architecture,
 /// can be 4 or 8 bytes.

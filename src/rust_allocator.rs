@@ -1,4 +1,4 @@
-use crate::{alloc, free, Block};
+use crate::{alloc, block::FIRST_FIT, free, Block};
 use std::alloc::{GlobalAlloc, Layout};
 
 /// Rust memory allocator using the mem alloc
@@ -8,7 +8,7 @@ pub struct RustAllocator;
 unsafe impl GlobalAlloc for RustAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let size = layout.size();
-        alloc(size)
+        alloc(size, FIRST_FIT)
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, _layout: Layout) {

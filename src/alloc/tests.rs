@@ -1,4 +1,5 @@
 use super::{align, alloc, alloc_size, free, get_header};
+use crate::block::FIRST_FIT;
 
 #[test]
 fn test_align() {
@@ -23,14 +24,14 @@ fn test_alloc() {
     //
     // A request for 3 bytes is aligned to 8.
     //
-    let p1 = alloc(3);
+    let p1 = alloc(3, FIRST_FIT);
     let p1b = get_header(p1);
     assert!(unsafe { (*p1b).header.size == 8 });
 
     // --------------------------------------
     // Test case 2: Exact amount of aligned bytes.
     //
-    let p2 = alloc(8);
+    let p2 = alloc(8, FIRST_FIT);
     let p2b = get_header(p2);
     assert!(unsafe { (*p2b).header.size == 8 });
 
@@ -45,7 +46,7 @@ fn test_alloc() {
     //
     // A consequent allocation of the same size reuses
     // the previously freed block.
-    let p3 = alloc(8);
+    let p3 = alloc(8, FIRST_FIT);
     let p3b = get_header(p3);
     assert!(unsafe { (*p3b).header.size == 8 });
     assert!(p3b == p2b);

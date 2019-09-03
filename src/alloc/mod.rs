@@ -1,16 +1,12 @@
-use crate::block::{
-    Block, ObjectHeader, DataPointer, ReuseAlgorithm, ReuseAlgorithmBuilder, UserData, WordSize,
-};
+use crate::block::{Block, BlockReuseFn, DataPointer, ObjectHeader, UserData, WordSize};
 use crate::heap::{HEAP_START, HEAP_TOP};
 use std::{mem, ptr};
 
 #[cfg(test)]
 mod tests;
 
-type Algorithm = ReuseAlgorithmBuilder;
-
 /// Allocates a block of memory of (at least) `size` bytes.
-pub fn alloc(size: usize) -> DataPointer {
+pub fn alloc(size: usize, find_block: BlockReuseFn) -> DataPointer {
     let size = align(size);
 
     if let Some(block) = find_block(size) {
@@ -50,12 +46,6 @@ pub fn alloc(size: usize) -> DataPointer {
 pub fn free(data: DataPointer) {
     let block = get_header(data);
     unsafe { (*block).header.used = false };
-}
-
-/// Tries to find a block of a needed size.
-fn find_block(size: usize) -> Option<*mut Block> {
-    let algorithm = ReuseAlgorithmBuilder::build(Algorithm::FirstFit);
-    algorithm.find_block(size)
 }
 
 /// Get a pointer to data of a block.
