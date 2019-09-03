@@ -11,13 +11,13 @@
     unused_qualifications
 )]
 
-mod alloc;
+mod allocator;
 mod block;
 mod heap;
-mod rust_allocator;
+mod malloc;
 
 extern crate libc;
 
-pub use alloc::{alloc, free};
+pub use allocator::FirstFit;
 pub use block::Block;
-pub use rust_allocator::RustAllocator;
+pub use malloc::{alloc, free};

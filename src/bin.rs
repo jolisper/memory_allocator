@@ -1,7 +1,7 @@
-use libmemory_allocator::RustAllocator;
+use libmemory_allocator::FirstFit;
 
 #[global_allocator]
-static GLOBAL: RustAllocator = RustAllocator;
+static GLOBAL: FirstFit = FirstFit;
 
 pub fn main() {
     // Alloc simple i32

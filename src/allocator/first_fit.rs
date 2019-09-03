@@ -3,9 +3,9 @@ use std::alloc::{GlobalAlloc, Layout};
 
 /// Rust memory allocator using the mem alloc
 #[derive(Debug)]
-pub struct RustAllocator;
+pub struct FirstFit;
 
-unsafe impl GlobalAlloc for RustAllocator {
+unsafe impl GlobalAlloc for FirstFit {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let size = layout.size();
         alloc(size, FIRST_FIT)

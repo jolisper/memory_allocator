@@ -82,6 +82,6 @@ fn request_from_os(size: usize) -> Option<*mut Block> {
 }
 
 /// Returns the object header.
-pub fn get_header(data: DataPointer) -> *mut Block {
+fn get_header(data: DataPointer) -> *mut Block {
     (data as usize - mem::size_of::<ObjectHeader>()) as *mut Block
 }
