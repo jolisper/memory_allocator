@@ -1,29 +1,39 @@
-pub(crate) mod reuse;
+mod reuse;
 
-pub(crate) use reuse::{ReuseAlgorithm, ReuseAlgorithmBuilder};
+pub use reuse::{BlockReuseFn, FIRST_FIT};
 
 /// Machine word size. Depending on the architecture,
 /// can be 4 or 8 bytes.
-pub type WordSize = libc::intptr_t;
-/// Data pointer type.
-pub type DataPointer = [WordSize; 1];
+pub type WordSize = isize;
+/// Data type.
+pub type UserData = [u8; 1];
+/// Data pointer.
+pub type DataPointer = *mut u8;
 
-/// Allocated block of memory. Contains the object structure,
-/// and the actual payload pointer.
+/// Headers.
+#[derive(Debug, Clone)]
 #[repr(C)]
-#[derive(Debug)]
-pub struct Block {
-    // -------- Object Header -----------
-    /// Block size
-    pub size: libc::size_t,
+pub struct ObjectHeader {
+    /// Block size.
+    pub size: usize,
 
-    /// Whether this block is currently used
+    /// Whether this block is currently used.
     pub used: bool,
 
-    /// Next block in the list
+    /// Next block in the list.
     pub next: *mut Block,
+}
+
+/// Allocated block of memory. Contains the object structure,
+/// and the actual user data.
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct Block {
+    // -------- Object Header -----------
+    /// Object header part.
+    pub header: ObjectHeader,
 
     // --------- User Data --------------
-    /// Payload pointer
-    pub data: DataPointer,
+    /// User data part.
+    pub data: UserData,
 }
